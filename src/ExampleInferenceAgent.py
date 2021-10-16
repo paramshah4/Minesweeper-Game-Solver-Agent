@@ -35,21 +35,32 @@ def exampleInferenceAgent(MAZE, DIM, x, y):
             currState = -1
             # checking if path returned by A* is [-1] or not
             if path == [-1]:
-                return [-1], total_cells_popped
+                return 0,[-1], total_cells_popped
             # reaching here means path has values in it which the agent will now process and traverse accordingly.
             (i1, j1) = z
             # check if goal is reached. If condition met then append the goal node indices to the new_path and assess
             # the neighbouring cells in FOV(field of view) and update the environment. Also return the trajectory
             # nodes popped off(nodes processed)
             if (i1, j1) == (DIM - 1, DIM - 1):
+                number_of_cells_not_hidden = 0
+
+                for i in range(0, dimension):
+                    for j in range(0, dimension):
+                        if new_maze[i][j].hidden is False:
+                            number_of_cells_not_hidden = number_of_cells_not_hidden + 1
+                        else:
+                            new_maze[i][j].state = 1
+                # for i in range(0, dimension):
+                #     for j in range(0, dimension):
+                #         print(str(new_maze[i][j].state) + " ", end=" ")
+                #     print("\n")
+                # print("\n\n\n")
+
+                """For length of shortest path in now discovered gridworld:"""
+                path_in_now_discovered_gridworld, blocked_cell1, cells_popped1 = astar(new_maze, dimension, 0, 0)
+                # print("Shortest Path:" + str(path_in_now_discovered_gridworld))
                 new_path.append((i1, j1))
-                # neighbours = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                # for (X, Y) in neighbours:
-                #     a = i1 + X
-                #     b = j1 + Y
-                #     if a + b > 0 and 0 <= a < dim1 and 0 <= b < dim1:
-                #         new_maze[a][b].state = og_maze[a][b].state
-                return block_count,new_path, total_cells_popped
+                return len(path_in_now_discovered_gridworld), new_path, total_cells_popped
             # if not goal then append it to new_path as agent walks on it. Also update the FOV during walking phase.
             else:
                 if og_maze[i1][j1].state == 1:
@@ -71,11 +82,7 @@ def exampleInferenceAgent(MAZE, DIM, x, y):
                     #currState = new_maze[i1][j1].state
                     new_maze[i1][j1].cx = og_maze[i1][j1].cx
                     new_path.append((i1, j1))
-                    if updateNeigh(new_maze,i1,j1,dimension,path) is True:
-                        #print("Astar called for:" + str((parentx, parenty)))
-                        path, blocked_cell, cells_popped = astar(new_maze, dimension, i1, j1)
-                        new_path.pop()
-                        total_cells_popped = total_cells_popped + cells_popped
+                    updateNeigh(new_maze,i1,j1,dimension,path)
                     # if new_maze[i1][j1].hx == 0 and new_maze[i1][j1].state != 1:
                     #     continue
                     # elif new_maze[i1][j1].cx == new_maze[i1][j1].bx:
@@ -114,7 +121,7 @@ def exampleInferenceAgent(MAZE, DIM, x, y):
                 # next iteration
                 # new_path.pop()
     # return [-1] as trajectory because no path exits as all cells have been processed and goal is not met.
-    return block_count,[-1], total_cells_popped
+    return 0,[-1], total_cells_popped
 
 
 # def updatingNeighbours(new_maze, og_maze, i1, j1, currState, dimension):
@@ -140,6 +147,8 @@ def updateNeigh(new_maze, x, y,dimension,path):
         flag=False
         i1,j1=queue.pop(0)
         currState=new_maze[i1][j1].state
+        if currState==1:
+            continue
         if new_maze[i1][j1].cx!=-1 and currState==0:
             if new_maze[i1][j1].hx == 0:
                 updateState=-1
@@ -170,8 +179,6 @@ def updateNeigh(new_maze, x, y,dimension,path):
                             new_maze[a][b].state=updateState
                             new_maze[a][b].hidden = False
                             queue.append((a, b))
-                            if updateState == 1 and (a,b) in path:
-                                blocked=True
 
         new_maze[i1][j1].visited = True
         return blocked
