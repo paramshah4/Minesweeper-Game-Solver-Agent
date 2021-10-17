@@ -42,6 +42,8 @@ class Cell:
         self.ex = ex
         self.hx = hx
         self.hidden = hidden
+        self.probablity_blocked=set()
+        self.neighbor_updated=False
 
 
 def set_attributes(maze, dimension, density, type_of_maze):
